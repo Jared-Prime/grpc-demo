@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package demo;
+
+service Echo {
+  rpc Basic(EchoMessage) returns (EchoMessage) {}
+  rpc StreamFromClient(stream EchoMessage) returns(EchoMessage) {}
+  rpc StreamFromServer(EchoMessage) returns (stream EchoMessage) {}
+  rpc StreamBothWays(stream EchoMessage) returns (stream EchoMessage) {}
+}
+
+message EchoMessage {
+  string contents = 1;
+}

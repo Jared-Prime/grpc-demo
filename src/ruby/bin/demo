@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'yaml'
+
+Options = Struct.new(:pidfile, :daemon, :configuration, :bind_address)
+options = Options.new('/tmp/demo.pid', false, 'config/demo.yml', '0.0.0.0:50051')
+OptionParser.new do |opts|
+  opts.banner = 'Usage: bundle exec demo [OPTIONS]'
+  opts.on('-pPIDFILE', '--pidfile=PIDFILE', 'pidfile to use') do |opt|
+    options.pidfile = opt
+  end
+
+  opts.on('-d', '--daemon', 'daemonize the process') do |opt|
+    options.daemon = opt
+  end
+
+  opts.on('-cCONFIG', '--configurationCONFIG', 'configuration to use') do |opt|
+    options.configuration = opt
+  end
+
+  opts.on('-bADDRESS', '--bindADDRESS', 'address and port to bind the server') do |opt|
+    options.bind_address = opt
+  end
+end.parse!
+
+puts 'Starting Demo Application with options:'
+puts "\tpidfile: #{options.pidfile}"
+puts "\tdaemon: #{options.daemon}"
+puts "\tbind_address: #{options.bind_address}"
+puts "\tconfiguration: #{options.configuration}"
+puts "\t#{File.read(options.configuration)}"
+
+File.write(options.pidfile, Process.pid)
+configuration = YAML.load_file(options.configuration)
+
+Process.daemon(true) if options.daemon
+
+require 'demo'
+
+server = GRPC::RpcServer.new
+server.add_http2_port(options.bind_address, :this_port_is_insecure)
+
+configuration.fetch('handlers', []).each do |handler, path|
+  require path
+  server.handle(Object.const_get(handler))
+end
+
+puts 'running server...'
+server.run_till_terminated
+puts 'bye!'

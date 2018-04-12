@@ -1,0 +1,13 @@
+version: '3'
+services:
+  server:
+    image: jprime3/grpc-demo:ruby
+    build:
+      context: .
+      dockerfile: src/ruby/Dockerfile
+    command: bundle exec demo
+  client:
+    image: jprime3/grpc-demo:ruby
+    command: bundle exec pry
+    links:
+      - server:echo.demo.svc
