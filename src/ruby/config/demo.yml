@@ -1,0 +1,2 @@
+handlers:
+  'Demo::Server': './lib/demo/server'
