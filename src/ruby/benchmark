@@ -4,12 +4,13 @@ require 'benchmark'
 require 'ddtrace'
 require 'demo'
 
-count = ARGV[0] || 10_000
+count = ENV.fetch('BENCHMARK_COUNT', 10_000).to_i
 
 Datadog.configure do |c|
   c.tracer hostname: 'datadog.agent.svc',
-           env: 'perf'
-  c.use :grpc
+           env: 'test'
+  c.use :grpc,
+        service_name: 'benchmark'
 end
 
 client = Demo::Echo::Service.rpc_stub_class.new('echo.demo.svc:50051', :this_channel_is_insecure)

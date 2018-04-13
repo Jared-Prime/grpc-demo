@@ -41,9 +41,9 @@ require 'demo'
 
 Datadog.configure do |c|
   c.tracer hostname: 'datadog.agent.svc',
-           debug: true,
            env: 'test'
-  c.use :grpc
+  c.use :grpc,
+        service_name: 'benchmark'
 end
 
 server = GRPC::RpcServer.new

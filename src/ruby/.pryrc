@@ -5,7 +5,8 @@ Datadog.configure do |c|
   c.tracer hostname: 'datadog.agent.svc',
            debug: true,
            env: 'test'
-  c.use :grpc
+  c.use :grpc,
+        service_name: 'benchmark'
 end
 
 client = Demo::Echo::Service.rpc_stub_class.new('echo.demo.svc:50051', :this_channel_is_insecure)
