@@ -36,7 +36,15 @@ configuration = YAML.load_file(options.configuration)
 
 Process.daemon(true) if options.daemon
 
+require 'ddtrace'
 require 'demo'
+
+Datadog.configure do |c|
+  c.tracer hostname: 'datadog.agent.svc',
+           debug: true,
+           env: 'test'
+  c.use :grpc
+end
 
 server = GRPC::RpcServer.new
 server.add_http2_port(options.bind_address, :this_port_is_insecure)
