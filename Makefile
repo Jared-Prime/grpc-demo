@@ -14,7 +14,7 @@ console-pry: services ## attach to pry on the client container
 	@docker-compose run --rm client
 
 perf: services ## run performance benchmark test
-	@docker-compose run --rm client bundle exec ./benchmark
+	@docker-compose run -e BENCHMARK_COUNT=10 --rm client bundle exec ./benchmark
 
 services: ## start services with docker-compose
 	@docker-compose up -d
