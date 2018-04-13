@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+require 'benchmark'
+require 'ddtrace'
+require 'demo'
+
+count = ARGV[0] || 10_000
+
+Datadog.configure do |c|
+  c.tracer hostname: 'datadog.agent.svc',
+           env: 'perf'
+  c.use :grpc
+end
+
+client = Demo::Echo::Service.rpc_stub_class.new('echo.demo.svc:50051', :this_channel_is_insecure)
+
+include Benchmark
+
+puts "running #{count} iterations..."
+
+Benchmark.benchmark(CAPTION, 20, FORMAT) do |x|
+  rr = x.report('request_response') do
+    count.times do
+      client.basic(Demo::EchoMessage.new(contents: 'hello'))
+    end
+  end
+
+  cs = x.report('client_streamer') do
+    count.times do
+      client.stream_from_client([Demo::EchoMessage.new(contents:'hello'), Demo::EchoMessage.new(contents:'world')])
+    end
+  end
+  
+  ss = x.report('server_streamer') do
+    count.times do
+      client.stream_from_server(Demo::EchoMessage.new(contents:'hello'))
+    end
+  end
+  
+  bs = x.report('bidi_streamer') do
+    count.times do
+      client.stream_both_ways([Demo::EchoMessage.new(contents:'hello'), Demo::EchoMessage.new(contents:'world')])
+    end
+  end
+end

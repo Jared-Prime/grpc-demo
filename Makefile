@@ -8,10 +8,13 @@ clean: ## takedown services and remove unused images
 	@docker images | awk '/<none>/{ print $$3 }' | xargs docker rmi
 
 console-bash: services ## attach to bash on an extra client container
-	@docker-compose run --rm client
+	@docker-compose run --rm client bash
 
 console-pry: services ## attach to pry on the client container
-	@docker-compose run --rm client bundle exec pry
+	@docker-compose run --rm client
+
+perf: services ## run performance benchmark test
+	@docker-compose run --rm client bundle exec ./benchmark
 
 services: ## start services with docker-compose
 	@docker-compose up -d

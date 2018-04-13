@@ -21,14 +21,19 @@ ENV EDITOR vim
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y vim && \
+    apt-get install -qy vim python-dev && \
     apt-get clean && rm -rf /tmp/*
 
 COPY --from=gem /usr/local/bundle /usr/local/bundle
+
 COPY src/ruby/lib/demo/server.rb lib/demo/server.rb
 COPY src/ruby/config/demo.yml config/demo.yml
-RUN echo "source 'https://rubygems.org'\ngem 'demo', '>= 0.0.1'\ngem 'pry-byebug', '>= 3.5'\n" \
+RUN echo "source 'https://rubygems.org'\n\
+gem 'demo', '>= 0.0.1'\n\
+gem 'pry-byebug', '>= 3.5'\n\
+gem 'ddtrace', git: 'https://github.com/Jared-Prime/dd-trace-rb', branch: 'feature/grpc'\n" \
     > Gemfile && bundle install
 COPY src/ruby/.pryrc .pryrc 
+COPY src/ruby/benchmark benchmark
 
-CMD [ "bash" ]
+CMD [ "bundle", "exec", "pry" ]

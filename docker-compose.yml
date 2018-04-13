@@ -1,13 +1,24 @@
 version: '3'
 services:
+  datadog:
+    image: datadog/agent
+    environment:
+      DD_API_KEY: ${DD_API_KEY}
+      DD_HOSTNAME: dockerdatadog
+      DD_TAGS: "docker grpc-demo"
+      DD_APM_ENABLED: "true"
+      DD_PROCESS_AGENT_ENABLED: "false"
   server:
-    image: jprime3/grpc-demo:ruby
+    image: jprime/grpc-demo:ruby
     build:
       context: .
       dockerfile: src/ruby/Dockerfile
     command: bundle exec demo
+    links:
+      - datadog:datadog.agent.svc
   client:
-    image: jprime3/grpc-demo:ruby
+    image: jprime/grpc-demo:ruby
     command: bundle exec pry
     links:
       - server:echo.demo.svc
+      - datadog:datadog.agent.svc
