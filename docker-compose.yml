@@ -9,7 +9,7 @@ services:
       DD_APM_ENABLED: "true"
       DD_PROCESS_AGENT_ENABLED: "false"
   server:
-    image: jprime3/grpc-demo:ruby
+    image: jprime/grpc-demo:ruby
     build:
       context: .
       dockerfile: src/ruby/Dockerfile
@@ -17,7 +17,7 @@ services:
     links:
       - datadog:datadog.agent.svc
   client:
-    image: jprime3/grpc-demo:ruby
+    image: jprime/grpc-demo:ruby
     command: bundle exec pry
     links:
       - server:echo.demo.svc
